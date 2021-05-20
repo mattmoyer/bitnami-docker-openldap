@@ -186,8 +186,9 @@ ldap_start_bg() {
 ldap_stop() {
     local pid
     pid="$(get_pid_from_file "${LDAP_PID_FILE}")"
-    if is_ldap_running; then
+    if is_service_running "${pid}"; then
         kill "${pid}" 2>/dev/null
+        while is_service_running "${pid}"; do sleep 1; done
     fi
 }
 
@@ -272,7 +273,6 @@ ldap_add_custom_schema() {
     info "Adding custom Schema : $LDAP_CUSTOM_SCHEMA_FILE ..."
     debug_execute slapadd -F "$LDAP_ONLINE_CONF_DIR" -n 0 -l  "$LDAP_CUSTOM_SCHEMA_FILE"
     ldap_stop
-     while is_ldap_running; do sleep 1; done
     ldap_start_bg
 }
 
